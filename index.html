@@ -3,73 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f766e">
 <title>Gym Tracker</title>
 
 <style>
-body{
-font-family:Arial,sans-serif;
-background:#f4f4f4;
-margin:0;
-padding:15px;
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f7f6;
+  margin: 0;
+  padding: 15px;
+  color: #243432;
 }
 
-h1{
-text-align:center;
-color:#0f766e;
+h1 {
+  text-align: center;
+  color: #0f766e;
+  font-size: 25px;
 }
 
-.tabs{
-display:flex;
-gap:10px;
-justify-content:center;
-margin-bottom:20px;
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 20px;
 }
 
-.tab{
-background:#0f766e;
-color:white;
-border:none;
-padding:12px;
-border-radius:10px;
+.tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-.day{
-display:none;
+.tab {
+  flex: 1;
+  background: #dceeea;
+  color: #0f766e;
+  border: none;
+  padding: 13px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-.active{
-display:block;
+.tab.selected {
+  background: #0f766e;
+  color: white;
 }
 
-.card{
-background:white;
-padding:15px;
-margin-bottom:15px;
-border-radius:12px;
-box-shadow:0 2px 6px rgba(0,0,0,.1);
+.day { display: none; }
+.day.active { display: block; }
+
+.card {
+  background: white;
+  padding: 16px;
+  margin-bottom: 14px;
+  border-radius: 13px;
+  box-shadow: 0 2px 7px rgba(0,0,0,.07);
 }
 
-input{
-padding:8px;
-width:80px;
-margin-top:5px;
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
 }
 
-.save{
-width:100%;
-padding:15px;
-background:#0f766e;
-color:white;
-border:none;
-border-radius:12px;
-font-size:16px;
+.reps {
+  display: inline-block;
+  background: #e1f3ef;
+  color: #0f766e;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 13px;
 }
 
-.hist{
-font-size:12px;
-color:#555;
-margin-top:8px;
-white-space:pre-line;
+.weight-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.weight-row input {
+  width: 100px;
+  padding: 10px;
+  border: 1px solid #cbd5d1;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.series {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.series label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #f1f5f4;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.series input {
+  width: 18px;
+  height: 18px;
+  accent-color: #0f766e;
+}
+
+.hist {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 13px;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.actions {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 35px;
+}
+
+button {
+  cursor: pointer;
+}
+
+.save, .reset {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.save {
+  background: #0f766e;
+  color: white;
+}
+
+.reset {
+  background: #e2e8e6;
+  color: #334155;
+}
+
+.notice {
+  text-align: center;
+  color: #64748b;
+  font-size: 12px;
 }
 </style>
 </head>
@@ -77,161 +166,273 @@ white-space:pre-line;
 <body>
 
 <h1>💪 Mi Rutina Full Body</h1>
+<p class="subtitle">Registra tus series, pesos y progresión</p>
 
 <div class="tabs">
-<button class="tab" onclick="showDay('a')">Día A</button>
-<button class="tab" onclick="showDay('b')">Día B</button>
-<button class="tab" onclick="showDay('c')">Día C</button>
+  <button class="tab selected" data-day="a"
+    onclick="showDay('a')">Día A</button>
+  <button class="tab" data-day="b"
+    onclick="showDay('b')">Día B</button>
+  <button class="tab" data-day="c"
+    onclick="showDay('c')">Día C</button>
 </div>
 
 <div id="a" class="day active"></div>
 <div id="b" class="day"></div>
 <div id="c" class="day"></div>
 
-<button class="save" onclick="saveWorkout()">
-Guardar entrenamiento
-</button>
+<div class="actions">
+  <button class="save" onclick="saveWorkout()">
+    💾 Guardar entrenamiento
+  </button>
+  <button class="reset" onclick="resetChecks()">
+    ↻ Reiniciar casillas del día
+  </button>
+</div>
+
+<p class="notice">
+  Los datos se guardan en este dispositivo.
+</p>
 
 <script>
-
-const workout={
-
-a:[
-"Sentadilla",
-"Press banca",
-"Remo con barra",
-"Jalón al pecho",
-"Peso muerto rumano",
-"Curl barra",
-"Tríceps polea"
-],
-
-b:[
-"Peso muerto rumano",
-"Press militar",
-"Dominadas/Jalón",
-"Hip Thrust",
-"Remo polea baja",
-"Curl martillo",
-"Plancha"
-],
-
-c:[
-"Prensa",
-"Press inclinado",
-"Remo barra",
-"Fondos",
-"Face Pull",
-"Gemelos",
-"Core"
-]
-
+const workout = {
+  a: [
+    ["Sentadilla", 3, "8–10"],
+    ["Press banca", 4, "6–8"],
+    ["Remo con barra", 4, "8–10"],
+    ["Jalón al pecho", 3, "8–12"],
+    ["Peso muerto rumano", 3, "8–10"],
+    ["Curl barra", 3, "10–12"],
+    ["Tríceps polea", 3, "10–12"]
+  ],
+  b: [
+    ["Peso muerto rumano", 3, "8–10"],
+    ["Press militar", 3, "8–10"],
+    ["Dominadas/Jalón", 4, "6–10"],
+    ["Hip Thrust", 3, "8–12"],
+    ["Remo polea baja", 3, "8–10"],
+    ["Curl martillo", 3, "10–12"],
+    ["Plancha", 3, "30–45 segundos"]
+  ],
+  c: [
+    ["Prensa", 3, "10–12"],
+    ["Press inclinado", 3, "8–10"],
+    ["Remo barra", 4, "6–8"],
+    ["Fondos", 3, "8–12"],
+    ["Face Pull", 3, "12–15"],
+    ["Gemelos", 3, "12–20"],
+    ["Core", 3, "12–15"]
+  ]
 };
 
-function build(){
+let currentDay = "a";
 
-Object.keys(workout).forEach(day=>{
-
-let html="";
-
-workout[day].forEach(ex=>{
-
-let id=day+"_"+ex;
-
-let peso=
-localStorage.getItem(id) || "";
-
-let hist=
-localStorage.getItem(id+"_hist") || "";
-
-html += `
-<div class="card">
-
-<h3>${ex}</h3>
-
-Peso:
-
-<br><br>
-
-<input
-type="number"
-id="${id}"
-value="${peso}"
-placeholder="kg">
-
-<br><br>
-
-<label><input type="checkbox"> S1</label>
-<label><input type="checkbox"> S2</label>
-<label><input type="checkbox"> S3</label>
-
-<div class="hist">
-${hist}
-</div>
-
-</div>
-`;
-
-});
-
-document.getElementById(day).innerHTML = html;
-
-});
-
+function key(day, index) {
+  return day + "_" + index;
 }
 
-function showDay(day){
-
-document
-.querySelectorAll(".day")
-.forEach(d=>d.classList.remove("active"));
-
-document
-.getElementById(day)
-.classList.add("active");
-
+function getStored(keyName) {
+  return localStorage.getItem(keyName) || "";
 }
 
-function saveWorkout(){
-
-const fecha=
-new Date().toLocaleDateString('es-ES');
-
-Object.keys(workout).forEach(day=>{
-
-workout[day].forEach(ex=>{
-
-let id=day+"_"+ex;
-
-let peso=
-document.getElementById(id).value;
-
-if(peso){
-
-let viejo=
-localStorage.getItem(id+"_hist") || "";
-
-localStorage.setItem(id,peso);
-
-localStorage.setItem(
-id+"_hist",
-fecha + " → " + peso + " kg\n" + viejo
-);
-
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-});
+function build() {
+  Object.keys(workout).forEach(day => {
+    let html = "";
 
-});
+    workout[day].forEach((exercise, index) => {
+      const [name, sets, reps] = exercise;
+      const id = key(day, index);
 
-alert("Entrenamiento guardado");
+      // Mantener los pesos del código anterior.
+      const oldKey = day + "_" + name;
+      const savedWeight =
+        getStored("weight_" + id) ||
+        getStored(oldKey);
+
+      const history = JSON.parse(
+        getStored("history_" + id) || "[]"
+      );
+
+      const oldHistory = getStored(oldKey + "_hist");
+
+      let seriesHTML = "";
+
+      for (let s = 1; s <= sets; s++) {
+        const checkKey = "check_" + id + "_" + s;
+        const checked =
+          getStored(checkKey) === "true" ? "checked" : "";
+
+        seriesHTML += `
+          <label>
+            <input type="checkbox"
+              ${checked}
+              onchange="saveCheck('${checkKey}',this.checked)">
+            S${s}
+          </label>
+        `;
+      }
+
+      const historyText = history.length
+        ? history.slice(0, 8).map(item =>
+            escapeHTML(item.date) + " → " +
+            escapeHTML(item.weight) + " kg"
+          ).join("\n")
+        : oldHistory;
+
+      html += `
+        <div class="card">
+          <h3>${escapeHTML(name)}</h3>
+          <div class="reps">
+            ${sets} series × ${escapeHTML(reps)}
+          </div>
+
+          <div class="weight-row">
+            <strong>Peso:</strong>
+            <input
+              type="number"
+              min="0"
+              step="0.5"
+              inputmode="decimal"
+              id="weight_${id}"
+              value="${escapeHTML(savedWeight)}"
+              placeholder="kg"
+              oninput="saveWeight('${id}',this.value)">
+            <span>kg</span>
+          </div>
+
+          <div class="series">
+            ${seriesHTML}
+          </div>
+
+          <div class="hist">
+            ${historyText
+              ? "<strong>Historial:</strong>\n" + historyText
+              : "Sin historial todavía"}
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById(day).innerHTML = html;
+  });
+}
+
+function showDay(day) {
+  currentDay = day;
+
+  document.querySelectorAll(".day")
+    .forEach(element => {
+      element.classList.remove("active");
+    });
+
+  document.getElementById(day)
+    .classList.add("active");
+
+  document.querySelectorAll(".tab")
+    .forEach(button => {
+      button.classList.toggle(
+        "selected",
+        button.dataset.day === day
+      );
+    });
+}
+
+function saveWeight(id, value) {
+  localStorage.setItem("weight_" + id, value);
+}
+
+function saveCheck(id, checked) {
+  localStorage.setItem(id, String(checked));
+}
+
+function localDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1)
+    .padStart(2, "0");
+  const day = String(now.getDate())
+    .padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function saveWorkout() {
+  const date = localDate();
+  let saved = 0;
+
+  workout[currentDay].forEach((exercise, index) => {
+    const id = key(currentDay, index);
+    const weight = getStored("weight_" + id);
+
+    if (weight === "") return;
+
+    const historyKey = "history_" + id;
+    const history = JSON.parse(
+      getStored(historyKey) || "[]"
+    );
+
+    // Si ya se guardó hoy, actualizar el peso.
+    const previous = history.findIndex(
+      item => item.date === date
+    );
+
+    const entry = { date, weight };
+
+    if (previous >= 0) {
+      history[previous] = entry;
+    } else {
+      history.unshift(entry);
+    }
+
+    localStorage.setItem(
+      historyKey,
+      JSON.stringify(history.slice(0, 50))
+    );
+
+    saved++;
+  });
+
+  build();
+  showDay(currentDay);
+
+  alert(saved
+    ? "Entrenamiento del día guardado correctamente."
+    : "Introduce al menos un peso antes de guardar."
+  );
+}
+
+function resetChecks() {
+  if (!confirm(
+    "¿Reiniciar las casillas del Día " +
+    currentDay.toUpperCase() +
+    "? Los pesos y el historial se conservarán."
+  )) return;
+
+  workout[currentDay].forEach((exercise, index) => {
+    const sets = exercise[1];
+    const id = key(currentDay, index);
+
+    for (let s = 1; s <= sets; s++) {
+      localStorage.removeItem(
+        "check_" + id + "_" + s
+      );
+    }
+  });
+
+  build();
+  showDay(currentDay);
+}
 
 build();
-
-}
-
-build();
-
 </script>
 
 </body>
