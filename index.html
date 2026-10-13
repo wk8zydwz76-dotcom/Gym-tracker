@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gym Tracker</title>
+
+<style>
+body{
+font-family:Arial,sans-serif;
+background:#f4f4f4;
+margin:0;
+padding:15px;
+}
+
+h1{
+text-align:center;
+color:#0f766e;
+}
+
+.tabs{
+display:flex;
+gap:10px;
+justify-content:center;
+margin-bottom:20px;
+}
+
+.tab{
+background:#0f766e;
+color:white;
+border:none;
+padding:12px;
+border-radius:10px;
+}
+
+.day{
+display:none;
+}
+
+.active{
+display:block;
+}
+
+.card{
+background:white;
+padding:15px;
+margin-bottom:15px;
+border-radius:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+input{
+padding:8px;
+width:80px;
+margin-top:5px;
+}
+
+.save{
+width:100%;
+padding:15px;
+background:#0f766e;
+color:white;
+border:none;
+border-radius:12px;
+font-size:16px;
+}
+
+.hist{
+font-size:12px;
+color:#555;
+margin-top:8px;
+white-space:pre-line;
+}
+</style>
+</head>
+
+<body>
+
+<h1>💪 Mi Rutina Full Body</h1>
+
+<div class="tabs">
+<button class="tab" onclick="showDay('a')">Día A</button>
+<button class="tab" onclick="showDay('b')">Día B</button>
+<button class="tab" onclick="showDay('c')">Día C</button>
+</div>
+
+<div id="a" class="day active"></div>
+<div id="b" class="day"></div>
+<div id="c" class="day"></div>
+
+<button class="save" onclick="saveWorkout()">
+Guardar entrenamiento
+</button>
+
+<script>
+
+const workout={
+
+a:[
+"Sentadilla",
+"Press banca",
+"Remo con barra",
+"Jalón al pecho",
+"Peso muerto rumano",
+"Curl barra",
+"Tríceps polea"
+],
+
+b:[
+"Peso muerto rumano",
+"Press militar",
+"Dominadas/Jalón",
+"Hip Thrust",
+"Remo polea baja",
+"Curl martillo",
+"Plancha"
+],
+
+c:[
+"Prensa",
+"Press inclinado",
+"Remo barra",
+"Fondos",
+"Face Pull",
+"Gemelos",
+"Core"
+]
+
+};
+
+function build(){
+
+Object.keys(workout).forEach(day=>{
+
+let html="";
+
+workout[day].forEach(ex=>{
+
+let id=day+"_"+ex;
+
+let peso=
+localStorage.getItem(id) || "";
+
+let hist=
+localStorage.getItem(id+"_hist") || "";
+
+html += `
+<div class="card">
+
+<h3>${ex}</h3>
+
+Peso:
+
+<br><br>
+
+<input
+type="number"
+id="${id}"
+value="${peso}"
+placeholder="kg">
+
+<br><br>
+
+<label><input type="checkbox"> S1</label>
+<label><input type="checkbox"> S2</label>
+<label><input type="checkbox"> S3</label>
+
+<div class="hist">
+${hist}
+</div>
+
+</div>
+`;
+
+});
+
+document.getElementById(day).innerHTML = html;
+
+});
+
+}
+
+function showDay(day){
+
+document
+.querySelectorAll(".day")
+.forEach(d=>d.classList.remove("active"));
+
+document
+.getElementById(day)
+.classList.add("active");
+
+}
+
+function saveWorkout(){
+
+const fecha=
+new Date().toLocaleDateString('es-ES');
+
+Object.keys(workout).forEach(day=>{
+
+workout[day].forEach(ex=>{
+
+let id=day+"_"+ex;
+
+let peso=
+document.getElementById(id).value;
+
+if(peso){
+
+let viejo=
+localStorage.getItem(id+"_hist") || "";
+
+localStorage.setItem(id,peso);
+
+localStorage.setItem(
+id+"_hist",
+fecha + " → " + peso + " kg\n" + viejo
+);
+
+}
+
+});
+
+});
+
+alert("Entrenamiento guardado");
+
+build();
+
+}
+
+build();
+
+</script>
+
+</body>
+</html>
